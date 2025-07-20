@@ -13,10 +13,10 @@ CORS(app)
 
 # API configuration - Set your API keys as environment variables
 #OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-OPENAI_API_KEY="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"
+# OPENAI_API_KEY="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"
 # OPENAI_API_KEY="your-api-key-here"  # Alternative: hardcode for testing (not recommended for production)
 OLLAMA_BASE_URL = os.getenv('OLLAMA_BASE_URL', 'http://localhost:11434')
-
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 # HUGGING_FACE_BARK_KEY = "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"
 
 # Popular podcast platforms and their API endpoints

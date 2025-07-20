@@ -14,4 +14,3 @@ will be giving radio options among
 remove slider and do the modifications accordingly 
 
 
-GPT Solo Bro Project Key: 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

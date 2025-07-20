@@ -4,8 +4,8 @@ import requests
 import json
 import os
 import uuid
-from pydub import AudioSegment
-
+# from pydub import AudioSegment
+import subprocess
 
 app = Flask(__name__)
 # Enable CORS for all routes to prevent cross-origin errors
@@ -17,7 +17,7 @@ OPENAI_API_KEY="sk-proj-X4cEsLluGo7EaTwpSpB5Vvy6R_ieMGq-m3luGh1YfLNByiL244Dcw7qA
 # OPENAI_API_KEY="your-api-key-here"  # Alternative: hardcode for testing (not recommended for production)
 OLLAMA_BASE_URL = os.getenv('OLLAMA_BASE_URL', 'http://localhost:11434')
 
-HUGGING_FACE_BARK_KEY = "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"
+# HUGGING_FACE_BARK_KEY = "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"
 
 # Popular podcast platforms and their API endpoints
 PODCAST_PLATFORMS = {
@@ -528,8 +528,10 @@ def chunk_text(text, max_chars=CHUNK_LIMIT):
     return chunks
 
 
+
+
 def generate_voice_openai_full(text: str, voice_style: str, output_name: str = None) -> str:
-    """Generate full-length voice using OpenAI Text-to-Speech API with chunking and merging."""
+    """Generate full-length voice using OpenAI TTS with chunking and ffmpeg merging."""
     try:
         if not OPENAI_API_KEY:
             raise Exception("OpenAI API key not configured")
@@ -539,50 +541,59 @@ def generate_voice_openai_full(text: str, voice_style: str, output_name: str = N
             "Authorization": f"Bearer {OPENAI_API_KEY}",
             "Content-Type": "application/json"
         }
-        # model = "tts1"
+
         model = "tts-1-hd"
-
         chunks = chunk_text(text)
-        audio_segments = []
-
         print(f"🔹 Total chunks: {len(chunks)}")
 
-        # if(journey
+        temp_files = []
 
+        # Generate audio chunks
         for i, chunk in enumerate(chunks):
             payload = {
                 "model": model,
                 "voice": voice_style,
                 "input": chunk
             }
-            print(f"🔹 chunk ")
+            print(f"🔹 Processing chunk {i+1}")
             response = requests.post(url, headers=headers, json=payload)
-
-            if response.status_code in [401, 403, 429]:
-                raise Exception(f"OpenAI TTS Error: {response.status_code} - {response.text}")
-
             response.raise_for_status()
 
             temp_filename = f"temp_{uuid.uuid4().hex[:8]}.mp3"
             with open(temp_filename, "wb") as f:
                 f.write(response.content)
 
-            audio_segments.append(AudioSegment.from_file(temp_filename, format="mp3"))
+            temp_files.append(temp_filename)
 
-            # Clean up temp file
-            os.remove(temp_filename)
+        # Create silence.mp3 if not exists (0.3s silence)
+        silence_path = "silence_300ms.mp3"
+        if not os.path.exists(silence_path):
+            subprocess.run([
+                "ffmpeg", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono",
+                "-t", "0.3", "-q:a", "9", "-acodec", "libmp3lame", silence_path
+            ], check=True)
 
-        # Merge all segments
-        final_audio = audio_segments[0]
-        for seg in audio_segments[1:]:
-            final_audio += AudioSegment.silent(duration=300) + seg  # small pause between chunks
+        # Create a concat list for ffmpeg
+        concat_list_path = "concat_list.txt"
+        with open(concat_list_path, "w") as f:
+            for file in temp_files:
+                f.write(f"file '{file}'\n")
+                f.write(f"file '{silence_path}'\n")
 
-        # Save final file
-        os.makedirs("static/audio", exist_ok=True)
+        # Merge using ffmpeg
         final_name = output_name or f"audio_{uuid.uuid4().hex[:8]}.mp3"
         output_path = f"static/audio/{final_name}"
+        os.makedirs("static/audio", exist_ok=True)
 
-        final_audio.export(output_path, format="mp3")
+        subprocess.run([
+            "ffmpeg", "-f", "concat", "-safe", "0", "-i", concat_list_path,
+            "-c", "copy", output_path
+        ], check=True)
+
+        # Cleanup
+        for file in temp_files:
+            os.remove(file)
+        os.remove(concat_list_path)
 
         print(f"✅ Audio file created: {output_path}")
         return f"/{output_path}"

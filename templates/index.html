@@ -1,757 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#4ECDC4" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/png" href="/static/icon-192.png" />
     <title>SoloBro - Podcast Generator</title>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-triangle-slider@1.0.0/dist/triangle-slider.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f7f9;
+            color: #333;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
+        .app-container {
+            max-width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
-        .header {
-            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+        header {
+            background: linear-gradient(135deg, #4ECDC4, #667eea);
             color: white;
             text-align: center;
-            padding: 30px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+        header h1 {
+            font-size: 1.8rem;
+            margin: 0;
         }
 
-        .header p {
-            font-size: 1.2em;
+        header p {
+            font-size: 0.95rem;
             opacity: 0.9;
+            margin: 4px 0 0;
         }
 
-        .main-content {
-            padding: 40px;
+        main {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
         }
 
         .section {
-            margin-bottom: 40px;
-            padding: 30px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border-left: 5px solid #4ECDC4;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
         }
 
         .section h2 {
+            font-size: 1.3rem;
+            margin-bottom: 12px;
             color: #333;
-            margin-bottom: 20px;
-            font-size: 1.5em;
         }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #555;
-        }
-
-        .form-group input, .form-group select, .form-group textarea {
+        input, select, textarea {
             width: 100%;
             padding: 12px;
-            border: 2px solid #ddd;
+            border: 1px solid #ccc;
             border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
         }
 
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            outline: none;
-            border-color: #4ECDC4;
-        }
-
-        .tone-radio-group {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .radio-option {
-            position: relative;
-        }
-
-        .radio-option input[type="radio"] {
-            position: absolute;
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .radio-option label {
-            display: flex;
-            align-items: center;
-            padding: 20px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        .radio-option label:hover {
-            border-color: #4ECDC4;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
-        }
-
-        .radio-option input[type="radio"]:checked + label {
-            border-color: #4ECDC4;
-            background: linear-gradient(135deg, rgba(76, 205, 196, 0.1), rgba(255, 107, 107, 0.05));
-            box-shadow: 0 4px 15px rgba(76, 205, 196, 0.2);
-        }
-
-        .radio-icon {
-            font-size: 24px;
-            margin-right: 15px;
-            min-width: 40px;
-            text-align: center;
-        }
-
-        .radio-content {
-            flex: 1;
-        }
-
-        .radio-title {
-            font-weight: bold;
-            font-size: 16px;
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .radio-description {
-            font-size: 14px;
-            color: #666;
-            line-height: 1.4;
-        }
-
-        .radio-option input[type="radio"]:checked + label .radio-title {
-            color: #4ECDC4;
-        }
-
-        .btn {
-            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+        button {
+            background: linear-gradient(135deg, #4ECDC4, #FF6B6B);
             color: white;
             border: none;
-            padding: 15px 30px;
+            padding: 12px 20px;
+            font-size: 0.95rem;
             border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin: 10px 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: background 0.3s;
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        button:hover {
+            background: linear-gradient(135deg, #3acbc9, #ff5b5b);
         }
 
-        .btn-secondary {
-            background: linear-gradient(45deg, #667eea, #764ba2);
+        .status-box {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
         }
 
-        .results {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border: 2px solid #4ECDC4;
-        }
-
-        .podcast-results {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .podcast-item {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-        }
-
-        .podcast-item:hover {
-            transform: translateY(-5px);
-        }
-
-        .podcast-item img {
-            width: 80px;
-            height: 80px;
-            border-radius: 10px;
-            float: left;
-            margin-right: 15px;
-        }
-
-        .podcast-info h3 {
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .podcast-info p {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-
-        .provider-toggle {
-            display: flex;
-            background: #f0f0f0;
-            border-radius: 25px;
-            padding: 4px;
-            margin-bottom: 20px;
-        }
-
-        .provider-toggle button {
-            flex: 1;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 20px;
-            background: transparent;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .provider-toggle button.active {
-            background: #4ECDC4;
-            color: white;
-        }
-
-        .loading {
+        .offline-indicator {
+            background: #ffdddd;
+            color: #c0392b;
             text-align: center;
-            padding: 40px;
-            color: #666;
+            padding: 10px;
+            font-weight: bold;
         }
 
-        .loading::after {
-            content: '';
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #4ECDC4;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-left: 10px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .error {
-            background: #fee;
-            color: #c33;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #fcc;
-            margin: 10px 0;
-        }
-
-        .success {
-            background: #efe;
-            color: #3c3;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #cfc;
-            margin: 10px 0;
-        }
-
-        /* Audio Player Styles */
         .audio-player {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border: 2px solid #4ECDC4;
+            margin-top: 10px;
         }
 
-        .audio-player audio {
+        audio {
             width: 100%;
-            margin: 15px 0;
-            border-radius: 8px;
-        }
-
-        .audio-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 15px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .audio-info {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .audio-info h4 {
-            color: #333;
-            margin-bottom: 5px;
-            font-size: 16px;
-        }
-
-        .audio-info p {
-            color: #666;
-            font-size: 14px;
-            margin: 2px 0;
-        }
-
-        .download-btn {
-            background: linear-gradient(45deg, #45B7D1, #96CEB4);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: transform 0.2s;
-        }
-
-        .download-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .audio-placeholder {
-            background: #f8f9fa;
-            border: 2px dashed #4ECDC4;
-            border-radius: 8px;
-            padding: 30px;
-            text-align: center;
-            color: #666;
-            margin: 15px 0;
-        }
-
-        .audio-placeholder .icon {
-            font-size: 48px;
-            margin-bottom: 15px;
-            display: block;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
+    <div class="app-container">
+        <header>
             <h1>🎧 SoloBro</h1>
-            <p>Your AI-powered companion for gym sessions and solo travel</p>
-        </div>
+            <p>Your intelligent companion during workouts & travels</p>
+        </header>
 
-        <div class="main-content">
-            <!-- Podcast Search Section -->
+        <main>
+            <div id="offline-banner" class="offline-indicator" style="display: none;">
+                You are offline. Some features may not work.
+            </div>
+
             <div class="section">
                 <h2>🔍 Discover Podcasts</h2>
-                <div class="form-group">
-                    <label for="search-query">Search for podcasts by topic or name:</label>
-                    <input type="text" id="search-query" placeholder="e.g., fitness, productivity, technology">
-                </div>
-                <button class="btn" onclick="searchPodcasts()">Search Podcasts</button>
-                
-                <div id="search-results" class="results" style="display: none;">
-                    <h3>📻 Popular Podcasts Found:</h3>
-                    <div id="podcast-list" class="podcast-results"></div>
-                </div>
+                <input type="text" placeholder="e.g., fitness, history, technology" id="search-query" />
+                <button onclick="searchPodcasts()">Search</button>
             </div>
 
-            <!-- Content Generation Section -->
             <div class="section">
-                <h2>🎙️ Generate Custom Content</h2>
-                
-                <div class="form-group">
-                    <label for="topic">Topic or Subject:</label>
-                    <textarea id="topic" rows="3" placeholder="Describe what you want to learn about during your workout or travel..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="duration">Duration (minutes):</label>
-                    <input type="number" id="duration" value="30" min="5" max="45">
-                </div>
-
-                <div class="form-group">
-                    <label for="language">Language:</label>
-                    <select id="language">
-                        <option value="English">English</option>
-                        <option value="Spanish">Spanish</option>
-                        <option value="French">French</option>
-                        <option value="German">German</option>
-                        <option value="Italian">Italian</option>
-                        <option value="Portuguese">Portuguese</option>
-                        <option value="Hindi">Hindi</option>
-                    </select>
-                </div>
-
-                <!-- Tone Selection Radio Options -->
-                <div class="form-group">
-                    <label>Content Journey Type:</label>
-                    <div class="tone-radio-group">
-                        <div class="radio-option">
-                            <input type="radio" id="podcast" name="tone-journey" value="podcast" checked>
-                            <label for="podcast">
-                                <div class="radio-icon">🎙️</div>
-                                <div class="radio-content">
-                                    <div class="radio-title">Podcast</div>
-                                    <div class="radio-description">Analytical & debateful discussion covering downfalls, negatives, comebacks, and positive aspects</div>
-                                </div>
-                            </label>
-                        </div>
-                        <div class="radio-option">
-                            <input type="radio" id="story" name="tone-journey" value="story">
-                            <label for="story">
-                                <div class="radio-icon">📚</div>
-                                <div class="radio-content">
-                                    <div class="radio-title">Story Reading</div>
-                                    <div class="radio-description">Immersive storytelling experience written by a great author - feel like reading a captivating book</div>
-                                </div>
-                            </label>
-                        </div>
-                        <div class="radio-option">
-                            <input type="radio" id="lesson" name="tone-journey" value="lesson">
-                            <label for="lesson">
-                                <div class="radio-icon">🎓</div>
-                                <div class="radio-content">
-                                    <div class="radio-title">Lesson in Class</div>
-                                    <div class="radio-description">Rich, factual content like attending a class at Harvard or MIT - purely educational experience</div>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- API Provider Selection -->
-                <div class="form-group">
-                    <label>Content Generation Provider:</label>
-                    <div class="provider-toggle">
-                        <button type="button" class="active" data-provider="openai" onclick="toggleProvider(this, 'content')">OpenAI</button>
-                        <button type="button" data-provider="ollama" onclick="toggleProvider(this, 'content')">Ollama (Mistral)</button>
-                    </div>
-                </div>
-
-                <button class="btn" onclick="generateContent()">🚀 Generate Content</button>
-                
-                <div id="content-results" class="results" style="display: none;">
-                    <h3>📝 Generated Content:</h3>
-                    <div id="generated-content"></div>
-                    
-                    <!-- Voice Generation Section -->
-                    <div style="margin-top: 20px;">
-                        <h4>🎵 Convert to Audio:</h4>
-                        <div class="form-group">
-                            <label>Voice Generation Provider:</label>
-                            <div class="provider-toggle">
-                                <button type="button" class="active" data-provider="openai" onclick="toggleProvider(this, 'voice')">OpenAI TTS</button>
-                                <button type="button" data-provider="ollama" onclick="toggleProvider(this, 'voice')">Ollama TTS</button>
-                            </div>
-                        </div>
-                        
-                        <!-- <div class="form-group">
-                            <label for="voice-style">Voice Style:</label>
-                            <select id="voice-style">
-                                <option value="alloy">Alloy (Neutral)</option>
-                                <option value="echo">Echo (Male)</option>
-                                <option value="fable">Fable (British)</option>
-                                <option value="onyx">Onyx (Deep)</option>
-                                <option value="nova">Nova (Female)</option>
-                                <option value="shimmer">Shimmer (Soft)</option>
-                            </select>
-                        </div> -->
-                        
-                        <button class="btn btn-secondary" onclick="generateVoice()">🎤 Generate Audio</button>
-                        
-                        <div id="voice-results" style="margin-top: 20px;"></div>
-                    </div>
-                </div>
+                <h2>🎤 Generate Content</h2>
+                <textarea id="topic" rows="3" placeholder="What do you want to learn about?"></textarea>
+                <select id="journey">
+                    <option value="podcast">Podcast</option>
+                    <option value="story">Story</option>
+                    <option value="lesson">Lesson</option>
+                </select>
+                <input type="number" id="duration" placeholder="Duration in minutes" value="30" min="5" max="45" />
+                <select id="language">
+                    <option>English</option>
+                    <option>Spanish</option>
+                    <option>French</option>
+                </select>
+                <button onclick="generateContent()">🚀 Generate</button>
             </div>
-        </div>
+
+            <div class="section">
+                <h2>🎵 Generate Voice</h2>
+                <button onclick="generateVoice()">🎧 Convert to Audio</button>
+                <div class="audio-player" id="voice-results"></div>
+            </div>
+        </main>
     </div>
 
     <script>
-        // Global variables for journey type and providers
-        let selectedJourney = 'podcast';
-        let contentProvider = 'openai';
-        let voiceProvider = 'openai';
-        let generatedContent = '';
-
-        // Initialize radio button listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            initJourneySelection();
+        window.addEventListener('load', () => {
+            function updateOnlineStatus() {
+                const banner = document.getElementById('offline-banner');
+                banner.style.display = navigator.onLine ? 'none' : 'block';
+            }
+            window.addEventListener('online', updateOnlineStatus);
+            window.addEventListener('offline', updateOnlineStatus);
+            updateOnlineStatus();
         });
 
-        function initJourneySelection() {
-            const radioButtons = document.querySelectorAll('input[name="tone-journey"]');
-            
-            radioButtons.forEach(radio => {
-                radio.addEventListener('change', function() {
-                    if (this.checked) {
-                        selectedJourney = this.value;
-                        console.log('Selected journey:', selectedJourney);
-                    }
-                });
-            });
-        }
-
-        function toggleProvider(button, type) {
-            // Remove active class from siblings
-            button.parentNode.querySelectorAll('button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Add active class to clicked button
-            button.classList.add('active');
-            
-            // Update provider variable
-            const provider = button.getAttribute('data-provider');
-            if (type === 'content') {
-                contentProvider = provider;
-            } else if (type === 'voice') {
-                voiceProvider = provider;
-            }
-        }
-
         async function searchPodcasts() {
-            const query = document.getElementById('search-query').value.trim();
-            if (!query) {
-                alert('Please enter a search query');
-                return;
-            }
-
-            const resultsDiv = document.getElementById('search-results');
-            const podcastList = document.getElementById('podcast-list');
-            
-            resultsDiv.style.display = 'block';
-            podcastList.innerHTML = '<div class="loading">Searching for podcasts...</div>';
-
-            try {
-                const response = await fetch('/search_podcasts', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ query: query })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    displayPodcastResults(data.results);
-                } else {
-                    podcastList.innerHTML = `<div class="error">Error: ${data.error}</div>`;
-                }
-            } catch (error) {
-                podcastList.innerHTML = `<div class="error">Network error: ${error.message}</div>`;
-            }
-        }
-
-        function displayPodcastResults(results) {
-            const podcastList = document.getElementById('podcast-list');
-            let html = '';
-
-            if (results.apple && results.apple.length > 0) {
-                results.apple.forEach(podcast => {
-                    html += `
-                        <div class="podcast-item">
-                            <img src="${podcast.artwork || '/static/default-podcast.png'}" alt="${podcast.name}" onerror="this.src='/static/default-podcast.png'">
-                            <div class="podcast-info">
-                                <h3>${podcast.name}</h3>
-                                <p><strong>By:</strong> ${podcast.artist}</p>
-                                <p><strong>Genre:</strong> ${podcast.genre}</p>
-                                <p>${podcast.description ? podcast.description.substring(0, 150) + '...' : 'No description available'}</p>
-                                <a href="${podcast.url}" target="_blank" class="btn" style="display: inline-block; padding: 8px 16px; font-size: 14px; text-decoration: none;">View on Apple Podcasts</a>
-                            </div>
-                        </div>
-                    `;
-                });
-            } else {
-                html = '<div class="error">No podcasts found. Try a different search term.</div>';
-            }
-
-            podcastList.innerHTML = html;
+            const query = document.getElementById('search-query').value;
+            alert('Search functionality goes here for: ' + query);
         }
 
         async function generateContent() {
-            const topic = document.getElementById('topic').value.trim();
-            const duration = parseInt(document.getElementById('duration').value);
+            const topic = document.getElementById('topic').value;
+            const duration = document.getElementById('duration').value;
             const language = document.getElementById('language').value;
-
-            if (!topic) {
-                alert('Please enter a topic');
-                return;
-            }
-
-            const resultsDiv = document.getElementById('content-results');
-            const contentDiv = document.getElementById('generated-content');
-            
-            resultsDiv.style.display = 'block';
-            contentDiv.innerHTML = '<div class="loading">Generating content...</div>';
-
-            try {
-                const response = await fetch('/contentGenerate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        topic: topic,
-                        duration: duration,
-                        language: language,
-                        journey_type: selectedJourney,
-                        provider: contentProvider
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    generatedContent = data.content;
-                    contentDiv.innerHTML = `
-                        <div class="success">Content generated successfully using ${data.provider_used.toUpperCase()}</div>
-                        <div style="background: white; padding: 20px; border-radius: 8px; margin-top: 15px; white-space: pre-wrap; max-height: 400px; overflow-y: auto; border: 1px solid #ddd;">
-                            ${data.content}
-                        </div>
-                    `;
-                } else {
-                    contentDiv.innerHTML = `<div class="error">Error: ${data.error}</div>`;
-                }
-            } catch (error) {
-                contentDiv.innerHTML = `<div class="error">Network error: ${error.message}</div>`;
-            }
+            const journey = document.getElementById('journey').value;
+            alert(`Generate content for: ${topic}, ${duration} mins, ${language}, ${journey}`);
         }
 
         async function generateVoice() {
-            if (!generatedContent) {
-                alert('Please generate content first');
-                return;
-            }
-
-            // const voiceStyle = document.getElementById('voice-style').value;
-            const voiceResults = document.getElementById('voice-results');
-            
-            console.log(voiceResults)
-            // console.log(journey_type)
-
-            voiceResults.innerHTML = '<div class="loading">Generating audio...</div>';
-
-            try {
-                const response = await fetch('/voiceGenerate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        text: generatedContent,
-                        provider: voiceProvider,
-                        journey_type: selectedJourney,
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    // Check if we have a real audio URL or placeholder
-                    const isRealAudio = data.audio_url && !data.audio_url.includes('placeholder') && !data.audio_url.includes('Implementation needed');
-                    
-                    if (isRealAudio) {
-                        // Real audio file - create audio player
-                        voiceResults.innerHTML = `
-                            <div class="success">Audio generated successfully using ${data.provider_used.toUpperCase()}</div>
-                            <div class="audio-player">
-                                <div class="audio-info">
-                                    <h4>🎧 Generated Podcast Audio</h4>
-                                    <p><strong>Duration:</strong> ${document.getElementById('duration').value} minutes</p>
-                                    <p><strong>Duration:</strong> ${document.getElementById('language').value} language</p>
-                                </div>
-                                <audio controls preload="metadata">
-                                    <source src="${data.audio_url}" type="audio/mpeg">
-                                    <source src="${data.audio_url}" type="audio/wav">
-                                    <source src="${data.audio_url}" type="audio/ogg">
-                                    Your browser does not support the audio element.
-                                </audio>
-                                <div class="audio-controls">
-                                    <div class="audio-info">
-                                        <p><strong>File:</strong> ${data.audio_url.split('/').pop()}</p>
-                                    </div>
-                                    <a href="${data.audio_url}" download="solobro-podcast.mp3" class="download-btn">
-                                        📥 Download Audio
-                                    </a>
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        // Placeholder - show demo audio player
-                        voiceResults.innerHTML = `
-                            <div class="success">Audio generated successfully using ${data.provider_used.toUpperCase()}</div>
-                            <div class="audio-player">
-                                <div class="audio-info">
-                                    <h4>🎧 Generated Podcast Audio</h4>
-                                    <p><strong>Duration:</strong> ${document.getElementById('duration').value} minutes</p>
-                                    <p><strong>Duration:</strong> ${document.getElementById('language').value} language</p>
-                                </div>
-                                <div class="audio-placeholder">
-                                    <span class="icon">🎵</span>
-                                    <h4>Audio Player Ready</h4>
-                                    <p>Audio file would appear here when TTS is fully implemented</p>
-                                    <p><strong>Response:</strong> ${data.audio_url}</p>
-                                    <br>
-                                    <p><em>Demo: Here's a sample audio player that would play your generated content:</em></p>
-                                </div>
-                                <audio controls preload="none">
-                                    <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEbBSV+zPLZeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEbBSV+zPLZeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEbBSV+zPLZeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEbBQ==" type="audio/wav">
-                                    Your browser does not support the audio element.
-                                </audio>
-                                <div class="audio-controls">
-                                    <div class="audio-info">
-                                        <p><strong>Status:</strong> Ready for implementation</p>
-                                    </div>
-                                    <button class="download-btn" onclick="alert('Download would be available with real audio file')">
-                                        📥 Download Audio
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                    }
-                } else {
-                    voiceResults.innerHTML = `<div class="error">Error: ${data.error}</div>`;
-                }
-            } catch (error) {
-                voiceResults.innerHTML = `<div class="error">Network error: ${error.message}</div>`;
-            }
+            alert('Voice generation triggered');
         }
     </script>
 </body>
